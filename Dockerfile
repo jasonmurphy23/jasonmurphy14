@@ -1,10 +1,11 @@
 FROM python:3.10-slim
 
-# Install dependencies yang dibutuhkan termasuk yang untuk Chrome
+# Install dependencies
 RUN apt-get update && apt-get install -y \
     wget \
     gnupg \
-    apt-transport-https \
+    unzip \
+    curl \
     ca-certificates \
     fonts-liberation \
     libasound2 \
@@ -33,13 +34,13 @@ RUN apt-get update && apt-get install -y \
     gnupg2 \
     && rm -rf /var/lib/apt/lists/*
 
-# Download dan pasang Google Chrome stable .deb dari sumber resmi
+# Install Google Chrome stable v139
 RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 RUN dpkg -i google-chrome-stable_current_amd64.deb || apt-get install -fy
 RUN rm google-chrome-stable_current_amd64.deb
 
-# Pasang ChromeDriver versi sesuai Google Chrome
-ENV CHROME_DRIVER_VERSION=131.0.6778.108
+# Pasang ChromeDriver versi 139.0.7258.127 sesuai Chrome 139
+ENV CHROME_DRIVER_VERSION=139.0.7258.127
 RUN wget -q "https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/${CHROME_DRIVER_VERSION}/linux64/chromedriver-linux64.zip" -O /tmp/chromedriver.zip && \
     unzip /tmp/chromedriver.zip -d /usr/local/bin/ && \
     mv /usr/local/bin/chromedriver-linux64/chromedriver /usr/local/bin/chromedriver && \
