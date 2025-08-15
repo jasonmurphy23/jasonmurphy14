@@ -393,13 +393,13 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def cmd_cmds(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = (
         "Commands:\n"
-        "  /dork <query> <count>\n"
-        "    Example:\n"
-        '      /dork intext:\"shoes\"+\"powered by shopify\"+\"2025\" 100\n'
-        "    This will dork 100 sites for that query.\n\n"
+        "/dork <query> <count>\n"
+        "Example:\n"
+        '/dork intext:\"shoes\"+\"powered by shopify\"+\"2025\" 100\n'
+        "This will dork 100 sites for that query.\n\n"
         "For Admins Only:\n"
-        "  /bord <message>\n"
-        "    Broadcast the message to all registered users.\n"
+        "/bord <message>\n"
+        "Broadcast the message to all registered users.\n"
     )
     await update.message.reply_text(text)
 
@@ -545,3 +545,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
