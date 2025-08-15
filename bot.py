@@ -18,9 +18,8 @@ from telegram.ext import (
 )
 
 from selenium import webdriver
-from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.common.exceptions import WebDriverException, NoSuchElementException, ElementClickInterceptedException
 from selenium_stealth import stealth
 
@@ -72,18 +71,7 @@ def setup_chrome_driver():
         logger.info("Setting up ChromeDriver automatically...")
         subprocess.run(['apt-get', 'update'], check=True)
         subprocess.run(['apt-get', 'install', '-y', 'wget', 'unzip'], check=True)
-
-        chromedriver_url = (
-            "https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/"
-            "131.0.6778.108/linux64/chromedriver-linux64.zip"
-        )
-        subprocess.run(['wget', chromedriver_url, '-O', 'chromedriver_linux64.zip'], check=True)
-        subprocess.run(['unzip', '-o', 'chromedriver_linux64.zip'], check=True)
-        subprocess.run(['mv', 'chromedriver-linux64/chromedriver', '/usr/local/bin/chromedriver'], check=True)
-        subprocess.run(['chmod', '+x', '/usr/local/bin/chromedriver'], check=True)
-
-        subprocess.run(['rm', '-rf', 'chromedriver_linux64.zip', 'chromedriver-linux64'], check=True)
-        logger.info("ChromeDriver setup completed successfully.")
+        logger.info("ChromeDriver setup assumed managed by Selenium Manager.")
     except Exception as e:
         logger.error(f"Error setting up ChromeDriver: {e}")
         raise
@@ -104,16 +92,14 @@ def create_local_driver():
     chrome_options.add_argument("--disable-software-rasterizer")
     chrome_options.add_argument("--lang=en-US")
     chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-    chrome_options.binary_location = "/usr/bin/google-chrome"
     chrome_options.add_argument("--window-size=1920,1080")
     chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
     chrome_options.add_experimental_option("useAutomationExtension", False)
 
-    service = ChromeService(executable_path='/usr/local/bin/chromedriver')
-    local_driver = webdriver.Chrome(service=service, options=chrome_options)
+    driver = webdriver.Chrome(service=Service(), options=chrome_options)
 
     stealth(
-        local_driver,
+        driver,
         user_agent=(
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
             "AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -127,8 +113,8 @@ def create_local_driver():
         fix_hairline=True,
     )
 
-    local_driver.set_page_load_timeout(20)
-    return local_driver
+    driver.set_page_load_timeout(20)
+    return driver
 
 def click_google_consent_if_needed(driver, wait_seconds=2):
     time.sleep(wait_seconds)
@@ -139,7 +125,7 @@ def click_google_consent_if_needed(driver, wait_seconds=2):
     ]
     for sel in possible_selectors:
         try:
-            btn = driver.find_element(By.CSS_SELECTOR, sel)
+            btn = driver.find_element("css selector", sel)
             btn.click()
             logger.info(f"Clicked Google consent button: {sel}")
             time.sleep(1.5)
@@ -178,7 +164,7 @@ def google_search(query: str, limit: int = 10, offset: int = 0):
 
             time.sleep(2)
 
-            a_elements = driver.find_elements(By.CSS_SELECTOR, "div.yuRUbf > a")
+            a_elements = driver.find_elements("css selector", "div.yuRUbf > a")
             if not a_elements:
                 logger.info(f"No results found on page_index={page_index} => stopping.")
                 break
@@ -395,7 +381,7 @@ async def cmd_cmds(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Commands:\n"
         "/dork <query> <count>\n"
         "Example:\n"
-        '/dork intext:\"shoes\"+\"powered by shopify\"+\"2025\" 100\n'
+        '/dork intext:"shoes"+"powered by shopify"+"2025" 100\n'
         "This will dork 100 sites for that query.\n\n"
         "For Admins Only:\n"
         "/bord <message>\n"
@@ -464,7 +450,7 @@ async def cmd_dork(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"Design: {d['design']}\n"
             "\n"
             "⚡ PARAEL DORKER ⚡\n"
-            "🌩️ BOT: @Parael1101 🌩️\n"
+            "🌩️ BOT:@Parael1101 🌩️\n"
             "----------------------------------------\n"
         )
 
@@ -501,7 +487,6 @@ async def cmd_bord(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     message_to_broadcast = parts[1].strip()
 
-    # Since no registration, broadcast only to admin or empty list
     try:
         await context.bot.send_message(
             chat_id=ADMIN_ID,
@@ -545,4 +530,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
